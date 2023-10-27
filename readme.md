@@ -1,3 +1,3 @@
 # ron
 
-**ron - Run On Node ${version}**, is a Node.js version manager written with [bun](https://bun.sh), [typescript](https://typescriptlang.com), [React](https://react.com) and [ink](https://term.ink).
+**ron - Run On Node ${version}**, is a Node.js version manager written with [typescript](https://typescriptlang.com) using [commander](https://github.com/tj/commander.js).
