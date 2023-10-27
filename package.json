@@ -1,0 +1,45 @@
+{
+  "name": "@relbeits/ron",
+  "version": "0.1.0",
+  "description": "Run on Node - a Node.js Version Orchestrator that do not depends on Admin rights",
+  "bin": "dist/main.js",
+  "license": "ISC",
+  "type": "module",
+  "engines": {
+    "node": ">=16"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/euaaron/ron"
+  },
+  "keywords": [
+    "nodejs",
+    "node",
+    "version",
+    "manager",
+    "esbuild",
+    "cli"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc --watch",
+    "dev": "bun src/main.ts",
+    "lint": "prettier --check .",
+    "start": "node ./dist/main.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "dependencies": {    
+    "commander": "^11.1.0"
+  },
+  "devDependencies": {
+    "@sindresorhus/tsconfig": "^3.0.1",
+    "@types/node": "^20.8.9",
+    "@vdemedes/prettier-config": "^2.0.1",
+    "prettier": "^2.8.7",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.0.3"
+  },
+  "prettier": "@vdemedes/prettier-config"
+}
