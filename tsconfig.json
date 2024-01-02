@@ -1,10 +1,10 @@
 {
-	"extends": "@sindresorhus/tsconfig",
 	"compilerOptions": {
-		"outDir": "dist",
-		"emitDeclarationOnly": true,
-		"allowImportingTsExtensions": true,
-		"resolveJsonModule": true
-	},
-	"include": ["src"]
+		"target": "es2016",
+		"module": "commonjs",
+		"esModuleInterop": true,
+		"forceConsistentCasingInFileNames": true,
+		"strict": true,
+		"skipLibCheck": true
+	}
 }

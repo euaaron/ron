@@ -33,7 +33,7 @@ export async function remote() {
 				}`,
 			);
 		}
-		console.log('\nNow you probably will want to run');
+		console.log('\nNow you might want to run');
 		console.log(
 			'  $ ron --lts\t-> to install the latest lts version, or for example',
 		);
