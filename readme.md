@@ -6,7 +6,7 @@ RON - **Run On Node**, is a Node.js version manager made using [bun](https://bun
 
 ## WIP Disclaimer
 
-RON is still **work in progress** and everything, including language (tech) and libs are susceptible to change.
+RON is still **work in progress**, and everything, including language (tech) and libs, are susceptible to change.
 
 ## Install
 
