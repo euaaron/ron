@@ -22,7 +22,7 @@ So... why don't you try it yourself?
 
 ## Requirements
 
-- Windows PowerShell 5.1 or PowerShell Core 7+
+- Windows PowerShell 5.1 or PowerShell Core 7+ (tested only with PowerShell 7 aka `pwsh.exe`)
 - Windows OS (x64, x86, or ARM64)
 - Internet connection for downloading Node.js
 
