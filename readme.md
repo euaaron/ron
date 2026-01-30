@@ -20,8 +20,6 @@ ron is now my go-to solution to install Node.js in a machine, being a work machi
 
 So... why don't you try it yourself?
 
-## Installation
-
 ## Requirements
 
 - Windows PowerShell 5.1 or PowerShell Core 7+
@@ -36,10 +34,11 @@ So... why don't you try it yourself?
 
 > Note that not all Node.js versions support architectures win-x86 or win-arm64.
 
+## Installation
+
 ### From PowerShell Gallery
 
 > Not available yet
-
 
 ### Manual Installation
 
