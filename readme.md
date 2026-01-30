@@ -46,7 +46,7 @@ So... why don't you try it yourself?
 1. Clone or download this repository and paste everything inside that folder
 2. Import the module by writing the following inside your Powershell `$profile`:
   ```powershell
-  Import-Module "path\to\folder\ron.psd1"
+  Import-Module "path\to\folder\ron.psm1"
   ```
 3. Run `. $profile` or close Powershell and open it again, so it can load the changes.
 
