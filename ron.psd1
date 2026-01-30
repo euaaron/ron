@@ -24,7 +24,7 @@
     Description = 'Run on Node (ron) - A PowerShell-based Node.js version manager for Windows. Easily install, switch, and manage multiple Node.js versions.'
     
     # Minimum version of the PowerShell engine required by this module
-    PowerShellVersion = '5.1'
+    PowerShellVersion = '7.x'
     
     # Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
     FunctionsToExport = @('ron')
