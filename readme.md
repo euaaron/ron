@@ -38,7 +38,11 @@ So... why don't you try it yourself?
 
 ### From PowerShell Gallery
 
-> Not available yet
+```Powershell
+Install-Module ron
+# then add the below line to your $profile
+Import-Module ron
+```
 
 ### Manual Installation
 
