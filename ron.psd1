@@ -3,7 +3,7 @@
     RootModule = 'ron.psm1'
     
     # Version number of this module.
-    ModuleVersion = '1.0.2'
+    ModuleVersion = '1.0.3'
     
     # Supported PSEditions
     CompatiblePSEditions = @('Desktop', 'Core')
@@ -79,5 +79,6 @@
     # Default prefix for commands exported from this module. Override the default prefix using Import-Module -Prefix.
     # DefaultCommandPrefix = ''
 }
+
 
 
