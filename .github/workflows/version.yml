@@ -1,0 +1,42 @@
+name: Bump Version
+
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - closed
+
+jobs:
+  bump_version:
+    # Only run on successful merge to main, and skip docs/ci/test/[skip-ci]
+    if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main' && !startsWith(github.event.pull_request.title, 'docs') && !startsWith(github.event.pull_request.title, 'ci') && !startsWith(github.event.pull_request.title, 'test') && !endsWith(github.event.pull_request.title, '[skip-ci]') && !startsWith(github.event.pull_request.body || '', 'docs') && !startsWith(github.event.pull_request.body || '', 'ci') && !startsWith(github.event.pull_request.body || '', 'test') && !endsWith(github.event.pull_request.body || '', '[skip-ci]')
+
+    runs-on: windows-latest
+
+    permissions:
+      contents: write  # For pushing version bump
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for version comparison
+
+      - name: Update module version
+        shell: pwsh
+        run: |
+          .\.github\scripts\Update-ModuleVersion.ps1 -BumpType patch
+
+      - name: Commit version bump
+        shell: pwsh
+        run: |
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+
+          # Check if there are changes
+          if ((git status --porcelain | Measure-Object).Count -gt 0) {
+            git add ron.psd1 ron.psm1
+            git commit -m "ci: bump version [skip ci]"
+            git push
+          }

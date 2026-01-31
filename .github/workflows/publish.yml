@@ -1,86 +1,46 @@
-name: Publish Module
+name: Publish Gallery
 
 on:
-  pull_request:
-    branches:
-      - main
+  workflow_run:
+    workflows:
+      - Bump Version
     types:
-      - closed
+      - completed
 
 jobs:
-  publish:
-    # Only run on successful merge to main
-    if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main'
-    
+  publish_gallery:
+    if: github.event.workflow_run.conclusion == 'success'
     runs-on: windows-latest
-    
-    permissions:
-      contents: write  # For creating releases
-      
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Full history for version comparison
-          
-      - name: Update module version
+          ref: main
+          fetch-depth: 0
+
+      - name: Pull latest changes
         shell: pwsh
         run: |
-          .\.github\scripts\Update-ModuleVersion.ps1 -BumpType patch
-          
-      - name: Commit version bump
-        shell: pwsh
-        run: |
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git config user.name "github-actions[bot]"
-          
-          # Check if there are changes
-          if ((git status --porcelain | Measure-Object).Count -gt 0) {
-            git add ron.psd1 ron.psm1
-            git commit -m "ci: bump version [skip ci]"
-            git push
-          }
-          
-      - name: Get version
-        shell: pwsh
-        id: version
-        run: |
-          $manifest = Test-ModuleManifest -Path ron.psd1
-          $version = $manifest.Version.ToString()
-          Write-Output "version=$version" >> $env:GITHUB_OUTPUT
-          
-      - name: Package module
-        shell: pwsh
-        id: package
-        run: .\.github\scripts\Package-Module.ps1 -OutputPath dist
-        
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: v${{ steps.version.outputs.version }}
-          name: ron v${{ steps.version.outputs.version }}
-          files: dist/*.zip
-          draft: false
-          prerelease: false
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          
+          git fetch --all
+          git pull
+
       - name: Publish to PowerShell Gallery
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
-          
+
           # Set API key from secret
           $apiKey = '${{ secrets.POWERSHELL_GALLERY_API_KEY }}'
-          
+
           if ([string]::IsNullOrWhiteSpace($apiKey)) {
             Write-Error "POWERSHELL_GALLERY_API_KEY secret is not set"
             exit 1
           }
-          
+
           Write-Host "Publishing ron module to PowerShell Gallery..." -ForegroundColor Cyan
-          
+
           # Publish module
           Publish-Module -Path . -NuGetApiKey $apiKey -Verbose
-          
+
           Write-Host "Module published successfully!" -ForegroundColor Green
