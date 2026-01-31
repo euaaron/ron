@@ -6,7 +6,7 @@
 # GitHub: https://github.com/euaaron
 # This File: https://gist.github.com/euaaron/8b0a2497244b3711e65ad798bdc5873f
 # --------------------------------------------
-$ronVersion = "v1.0.3"
+$ronVersion = "v1.0.4"
 $silentInit = $true
 
 # Configuration
@@ -774,6 +774,7 @@ $config = Get-Config
 Check-LtsUpdate -Config $config
 
 Export-ModuleMember -Function ron -Variable ronrc
+
 
 
 
