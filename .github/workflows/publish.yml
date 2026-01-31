@@ -3,7 +3,7 @@ name: Publish Gallery
 on:
   workflow_run:
     workflows:
-      - Bump Version
+      - Release
     types:
       - completed
   workflow_dispatch:
@@ -20,11 +20,33 @@ jobs:
           ref: main
           fetch-depth: 0
 
-      - name: Pull latest changes
+      - name: Download release artifacts
         shell: pwsh
         run: |
-          git fetch --all
-          git pull
+          # Get the latest release
+          $release = Invoke-RestMethod -Uri "https://api.github.com/repos/${{ github.repository }}/releases/latest" `
+            -Headers @{ Authorization = "Bearer ${{ secrets.GITHUB_TOKEN }}" }
+          
+          if ($release.assets.count -eq 0) {
+            Write-Error "No release artifacts found"
+            exit 1
+          }
+
+          # Download the first zip asset
+          $zipAsset = $release.assets | Where-Object { $_.name -match '\.zip$' } | Select-Object -First 1
+          if (-not $zipAsset) {
+            Write-Error "No .zip artifact found in release"
+            exit 1
+          }
+
+          Write-Host "Downloading release artifact: $($zipAsset.name)" -ForegroundColor Cyan
+          Invoke-WebRequest -Uri $zipAsset.browser_download_url -OutFile $zipAsset.name
+          
+          # Extract the zip
+          Write-Host "Extracting module..." -ForegroundColor Cyan
+          Expand-Archive -Path $zipAsset.name -DestinationPath ./module -Force
+          
+          Write-Host "Release artifact ready at: ./module" -ForegroundColor Green
 
       - name: Publish to PowerShell Gallery
         shell: pwsh
@@ -41,7 +63,7 @@ jobs:
 
           Write-Host "Publishing ron module to PowerShell Gallery..." -ForegroundColor Cyan
 
-          # Publish module
-          Publish-Module -Path . -NuGetApiKey $apiKey -Verbose
+          # Publish module from the extracted release directory        
+          Publish-Module -Path ./module/ron -NuGetApiKey $apiKey -Verbose
 
           Write-Host "Module published successfully!" -ForegroundColor Green
