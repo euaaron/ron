@@ -6,11 +6,12 @@ on:
       - main
     types:
       - closed
+  workflow_dispatch:
 
 jobs:
   bump_version:
     # Only run on successful merge to main, and skip docs/ci/test/[skip-ci]
-    if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main' && !startsWith(github.event.pull_request.title, 'docs') && !startsWith(github.event.pull_request.title, 'ci') && !startsWith(github.event.pull_request.title, 'test') && !endsWith(github.event.pull_request.title, '[skip-ci]') && !startsWith(github.event.pull_request.body || '', 'docs') && !startsWith(github.event.pull_request.body || '', 'ci') && !startsWith(github.event.pull_request.body || '', 'test') && !endsWith(github.event.pull_request.body || '', '[skip-ci]')
+    if: github.event_name == 'workflow_dispatch' || (github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main' && !startsWith(github.event.pull_request.title, 'docs') && !startsWith(github.event.pull_request.title, 'ci') && !startsWith(github.event.pull_request.title, 'test') && !endsWith(github.event.pull_request.title, '[skip-ci]') && !startsWith(github.event.pull_request.body || '', 'docs') && !startsWith(github.event.pull_request.body || '', 'ci') && !startsWith(github.event.pull_request.body || '', 'test') && !endsWith(github.event.pull_request.body || '', '[skip-ci]'))
 
     runs-on: windows-latest
 
