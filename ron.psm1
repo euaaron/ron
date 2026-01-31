@@ -425,7 +425,10 @@ function ron {
 
   $dirArg = $null
   if ($Dir.IsPresent) {
-    if ($args.Count -gt 0) {
+    # Check if the positional argument was captured as $Change
+    if (-Not [string]::IsNullOrWhiteSpace($Change)) {
+      $dirArg = $Change
+    } elseif ($args.Count -gt 0) {
       $dirArg = $args[0]
       if ($Default.IsPresent -and $args.Count -gt 1) {
         $dirArg = $args[1]
@@ -707,7 +710,7 @@ function ron {
     Show-Help
   } elseif ($List.IsPresent) {
     nList -Remote:$Remote.IsPresent
-  } elseif ($Change -ne "") {
+  } elseif ($Change -ne "" -and -Not $Dir.IsPresent) {
     nChange -Version $Change -Arch $arch -Force $Force.IsPresent
     if ($Default.IsPresent) {
       $config = Get-Config
