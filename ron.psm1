@@ -373,6 +373,7 @@ function Set-NodePathEntry {
 # ============ MAIN RON FUNCTION ============
 
 function ron {
+  [CmdletBinding()]
   param(
     [Alias('c')]
     [string] $Change = "",    
@@ -393,12 +394,25 @@ function ron {
     [switch] $Dir,
     [Alias('d')]
     [switch] $Default,
-    [switch] $AutoUpdate,
-    [string] $AutoUpdateValue = ""
+    [switch] $AutoUpdate
   )
 
   # Load configuration
   $config = Get-Config
+
+  # Handle special case: if -Dir or -AutoUpdate is present, $Change contains their value
+  $dirArg = $null
+  $autoUpdateArg = $null
+  
+  if ($Dir.IsPresent -and -Not [string]::IsNullOrWhiteSpace($Change)) {
+    $dirArg = $Change
+    $Change = ""
+  }
+  
+  if ($AutoUpdate.IsPresent -and -Not [string]::IsNullOrWhiteSpace($Change)) {
+    $autoUpdateArg = $Change
+    $Change = ""
+  }
 
   # Validate that $Change is not a command name (user forgot the dash)
   $commandNames = @("init", "version", "list", "change", "dir", "default", "help", "remote", "arch", "force")
@@ -421,28 +435,6 @@ function ron {
     }
     $config.architecture = $Arch
     Set-Config $config
-  }
-
-  $dirArg = $null
-  if ($Dir.IsPresent) {
-    # Check if the positional argument was captured as $Change
-    if (-Not [string]::IsNullOrWhiteSpace($Change)) {
-      $dirArg = $Change
-    } elseif ($args.Count -gt 0) {
-      $dirArg = $args[0]
-      if ($Default.IsPresent -and $args.Count -gt 1) {
-        $dirArg = $args[1]
-      }
-    }
-  }
-
-  $autoUpdateArg = $null
-  if ($AutoUpdate.IsPresent) {
-    if (-Not [string]::IsNullOrEmpty($AutoUpdateValue)) {
-      $autoUpdateArg = $AutoUpdateValue
-    } elseif ($args.Count -gt 0) {
-      $autoUpdateArg = $args[0]
-    }
   }
 
   $nodeDir = $config.nodeDirectory
@@ -691,21 +683,6 @@ function ron {
 
   # -------- COMMAND ROUTING --------
   
-  # Check if any positional arguments are likely invalid commands
-  $hasValidCommand = $Help.IsPresent -or $List.IsPresent -or ($Change -ne "") -or $Dir.IsPresent -or $Version.IsPresent -or $Init.IsPresent -or $AutoUpdate.IsPresent
-  
-  if (-Not $hasValidCommand -and $args.Count -gt 0) {
-    $invalidArg = $args[0]
-    $closestCommand = Find-ClosestCommand -Input $invalidArg
-    
-    if ($closestCommand) {
-      Write-Log "Invalid command: '$invalidArg'. Did you mean '-$closestCommand'?" -IsError
-    } else {
-      Write-Log "Invalid command: '$invalidArg'. Run 'ron -help' to check available commands." -IsError
-    }
-    return
-  }
-  
   if ($Help.IsPresent) {
     Show-Help
   } elseif ($List.IsPresent) {
@@ -720,9 +697,12 @@ function ron {
     }
   } elseif ($Dir.IsPresent) {
     if (-Not [string]::IsNullOrWhiteSpace($dirArg)) {
-      $config.nodeDirectory = $dirArg
+      # Clean up user input and ensure it ends with \node\
+      $dirArg = $dirArg.Trim().TrimEnd('\')
+      $nodeDirectory = $dirArg + "\node\"
+      $config.nodeDirectory = $nodeDirectory
       Set-Config $config
-      Write-Log "Node.js installation directory set to $dirArg" -ForegroundColor Green
+      Write-Log "Node.js installation directory set to $nodeDirectory" -ForegroundColor Green
     } else {
       Write-Log "Node.js installation directory: $($config.nodeDirectory)" -ForegroundColor Green
     }
