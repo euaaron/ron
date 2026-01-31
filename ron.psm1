@@ -393,7 +393,6 @@ function ron {
     [switch] $Dir,
     [Alias('d')]
     [switch] $Default,
-    [string] $DefaultValue = "",
     [switch] $AutoUpdate,
     [string] $AutoUpdateValue = ""
   )
@@ -422,15 +421,6 @@ function ron {
     }
     $config.architecture = $Arch
     Set-Config $config
-  }
-
-  $defaultArg = $null
-  if ($Default.IsPresent) {
-    if (-Not [string]::IsNullOrEmpty($DefaultValue)) {
-      $defaultArg = $DefaultValue
-    } elseif ($args.Count -gt 0) {
-      $defaultArg = $args[0]
-    }
   }
 
   $dirArg = $null
@@ -495,7 +485,6 @@ function ron {
     if ((Test-Path $versionDir) -And -Not $Force) {
       Write-Log "Changed to Node.js $Version"
       Set-NodePathEntry -NodeDirectory $versionDir
-      Show-NodeVersion
       return
     }
 
@@ -684,20 +673,10 @@ function ron {
     Write-Host " <version>  | Switch to a Node.js version (auto-installs if needed)."
     Write-Log "                       Ex: ron -change 22 (installs latest v22.x.x)" -ForegroundColor Cyan
     
-    Write-Host "  -arch" -NoNewline -ForegroundColor Yellow
-    Write-Host " (-a)" -NoNewline -ForegroundColor DarkGray
-    Write-Host "            | Specify architecture: win-x64 (default) or win-x86."
-    
-    Write-Host "  -force" -NoNewline -ForegroundColor Yellow
-    Write-Host " (-f)" -NoNewline -ForegroundColor DarkGray
-    Write-Host "           | Force reinstall of existing version."
-    
-    Write-Host "-dir [path]" -NoNewline -ForegroundColor White
-    Write-Host "            | Show or set the Node.js installation directory."
-    
-    Write-Host "-default" -NoNewline -ForegroundColor White
+    Write-Host "  -default" -NoNewline -ForegroundColor Yellow
     Write-Host " (-d)" -NoNewline -ForegroundColor DarkGray
-    Write-Host " [ver]     | Show or set the default Node.js version."
+    Write-Host "        | (with version) Also set as default version in .ronrc."
+    Write-Log "                       Ex: ron 22 -default or ron -change 22 -default" -ForegroundColor Cyan
     
     Write-Host "-autoupdate [val]" -NoNewline -ForegroundColor White
     Write-Host "   | Show or set auto-update (true/false). Checks daily for LTS updates."
@@ -710,7 +689,7 @@ function ron {
   # -------- COMMAND ROUTING --------
   
   # Check if any positional arguments are likely invalid commands
-  $hasValidCommand = $Help.IsPresent -or $List.IsPresent -or ($Change -ne "") -or $Dir.IsPresent -or $Default.IsPresent -or $Version.IsPresent -or $Init.IsPresent -or $AutoUpdate.IsPresent
+  $hasValidCommand = $Help.IsPresent -or $List.IsPresent -or ($Change -ne "") -or $Dir.IsPresent -or $Version.IsPresent -or $Init.IsPresent -or $AutoUpdate.IsPresent
   
   if (-Not $hasValidCommand -and $args.Count -gt 0) {
     $invalidArg = $args[0]
@@ -730,6 +709,12 @@ function ron {
     nList -Remote:$Remote.IsPresent
   } elseif ($Change -ne "") {
     nChange -Version $Change -Arch $arch -Force $Force.IsPresent
+    if ($Default.IsPresent) {
+      $config = Get-Config
+      $config.defaultVersion = $Change
+      Set-Config $config
+      Write-Log "Default Node.js version set to $Change" -ForegroundColor Green
+    }
   } elseif ($Dir.IsPresent) {
     if (-Not [string]::IsNullOrWhiteSpace($dirArg)) {
       $config.nodeDirectory = $dirArg
@@ -737,14 +722,6 @@ function ron {
       Write-Log "Node.js installation directory set to $dirArg" -ForegroundColor Green
     } else {
       Write-Log "Node.js installation directory: $($config.nodeDirectory)" -ForegroundColor Green
-    }
-  } elseif ($Default.IsPresent) {
-    if (-Not [string]::IsNullOrWhiteSpace($defaultArg)) {
-      $config.defaultVersion = $defaultArg
-      Set-Config $config
-      Write-Log "Default Node.js version set to $defaultArg" -ForegroundColor Green
-    } else {
-      Write-Log "Default Node.js version: $($config.defaultVersion)" -ForegroundColor Green
     }
   } elseif ($AutoUpdate.IsPresent) {
     if (-Not [string]::IsNullOrWhiteSpace($autoUpdateArg)) {
